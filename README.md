@@ -11,7 +11,7 @@ I used the speeches available on [this page](http://www.vie-publique.fr/discours
 
 ## Code
 I used a Class :
-'class Speech:
+`class Speech:
 	# name of the speaker
 	# year of the speech
 	# nb of positive words
@@ -24,7 +24,7 @@ I used a Class :
         self.nbPositiveWords = nbPositiveWords 
         self.nbNegativeWords = nbNegativeWords 
         self.nbTotalWords = nbTotalWords
-self.ratio = (nbPositiveWords-nbNegativeWords)/nbTotalWords*100 # Here, I divide by the number of words because some speeches are longer than others.'
+self.ratio = (nbPositiveWords-nbNegativeWords)/nbTotalWords*100`
 
 I obtained the following results:
 ![Alt text](Positivness_ratio_among_time.png?raw=true "Title")
