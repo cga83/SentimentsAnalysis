@@ -78,6 +78,7 @@ getLexicons(positiveList, negativeList)
 
 # list of all the speeches, speakers and years:
 # if you want to add a speech, add it at the end of the array
+# the speeches should be ordered by speakers : you can't add a 'Macron's speech' between two 'Hollande's speeches' for instance
 Files = [
 			# ['Name', year, 'speechfile'],
 			[ 'Macron', 2018, 'Macron2018_voeux.txt'],
@@ -132,60 +133,41 @@ for i in range(sizeOfFiles-1, -1, -1): # browse all the array from end to beginn
 	
 # we fill up the informations for all the presidents
 iFiles = 0
+nbSpeaker = 0
 
-GiscardRatio = []
-GiscardYears = []
-while iFiles<sizeOfFiles and speeches[iFiles].name=='Giscard': # while there are analyzed speeches and they correspond to the president Giscard
-	GiscardRatio.append(speeches[iFiles].ratio)
-	GiscardYears.append(speeches[iFiles].year)
-	iFiles+=1
+nameOfSpeaker = "NotDefined" # This can't be a speaker's name. 
+nameOfSpeakers = []
+listOfSpeaker = [[]]
 
-	
-MitterandRatio = []
-MitterandYears = []
-while iFiles<sizeOfFiles and speeches[iFiles].name=='Mitterand':
-	MitterandRatio.append(speeches[iFiles].ratio)
-	MitterandYears.append(speeches[iFiles].year)
+# how many different speakers in the Files list ?
+while (iFiles<sizeOfFiles):
+	if nameOfSpeaker!=speeches[iFiles].name:
+		nameOfSpeaker=speeches[iFiles].name
+		nameOfSpeakers.append(nameOfSpeaker)
+		nbSpeaker+=1
 	iFiles+=1
 
-ChiracRatio = []
-ChiracYears = []
-while iFiles<sizeOfFiles and speeches[iFiles].name=='Chirac':
-	ChiracRatio.append(speeches[iFiles].ratio)
-	ChiracYears.append(speeches[iFiles].year)
-	iFiles+=1
-	
-SarkozyRatio = []
-SarkozyYears = []
-while iFiles<sizeOfFiles and speeches[iFiles].name=='Sarkozy':
-	SarkozyRatio.append(speeches[iFiles].ratio)
-	SarkozyYears.append(speeches[iFiles].year)
-	iFiles+=1
-	
-HollandeRatio = []
-HollandeYears = []
-while iFiles<sizeOfFiles and speeches[iFiles].name=='Hollande':
-	HollandeRatio.append(speeches[iFiles].ratio)
-	HollandeYears.append(speeches[iFiles].year)
-	iFiles+=1
+# do the separation
+# faire une fonction ? retourner une liste de structure ?
+iFiles = 0
+Result = []
 
-MacronRatio = []
-MacronYears = []
-while iFiles<sizeOfFiles and speeches[iFiles].name=='Macron':
-	MacronRatio.append(speeches[iFiles].ratio)
-	MacronYears.append(speeches[iFiles].year)
-	iFiles+=1
-
-# if you want to add a president:
-#PresidentRatio = []
-#PresidentYears = []
-#while iFiles<sizeOfFiles and speeches[iFiles].name=='nameOfThePresident':
-#	PresidentRatio.append(speeches[iFiles].ratio)
-#	PresidentYears.append(speeches[iFiles].year)
-#	iFiles+=1
+for i in range(0, nbSpeaker):
+	ratio = []
+	year = []
+	while (iFiles<sizeOfFiles and speeches[iFiles].name==nameOfSpeakers[i]):
+		ratio.append(speeches[iFiles].ratio)
+		year.append(speeches[iFiles].year)
+		iFiles+=1
+	Result.append(nameOfSpeakers[i]) # the name is the first param
+	Result.append(ratio) # then, there are the ratio
+	Result.append(year) # then, the years
 
 # we create a list with all the ratios
-Ratio = GiscardRatio + MitterandRatio + ChiracRatio + SarkozyRatio + HollandeRatio + MacronRatio # if you add a present, add the ratio here
+Ratio = []
+for i in range(1, len(Result), 3):
+	for j in range(0, len(Result[i])):
+		Ratio.append(Result[i][j])
 
 # we calculate the moving average and also two limits (inf and sup)
 movingAverage = []
@@ -205,28 +187,30 @@ plt.figure(1)
 plt.plot(yearsMovingAv, movingAverage, 'b', label='Moving Average')
 plt.plot(yearsMovingAv, movingAverageInf, 'b--')
 plt.plot(yearsMovingAv, movingAverageSup, 'b--')
-plt.scatter(GiscardYears,GiscardRatio, c = 'magenta', label='Giscard') 
-plt.scatter(MitterandYears,MitterandRatio, c = 'black', label='Mitterand') 
-plt.scatter(ChiracYears,ChiracRatio, c = 'yellow', label='Chirac') 
-plt.scatter(SarkozyYears, SarkozyRatio, c = 'green', label='Sarkozy')
-plt.scatter(HollandeYears, HollandeRatio, c = 'cyan', label='Hollande') 
-plt.scatter(MacronYears, MacronRatio, c = 'red', label='Macron')
-# add another scatter if you have another president 
+color = ['magenta', 'black', 'yellow', 'blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
+iColor = 0
+for i in range(0, nbSpeaker*3, 3): # for each speakers, there are 3 parameters (name, ratio and year) => i in range(0, 3*nbSpeaker)
+	if (iColor>=len(color)):
+		iColor=0
+	plt.scatter(Result[i+2],Result[i+1], c = color[iColor], label=Result[i]) 
+	iColor+=1
+
 plt.legend()
 plt.title('Positiveness ratio in speeches depending on the year')
 plt.show()
 
+
 # second figure :
-RatioList = [GiscardRatio, MitterandRatio, ChiracRatio, SarkozyRatio, HollandeRatio, MacronRatio] # if you add another president, add the ratio in the list
+RatioList = [] 
+for i in range(0, nbSpeaker*3, 3):
+	RatioList.append(Result[i+1])
 fig, ax = plt.subplots()
 fig.canvas.draw()
 labels = [item.get_text() for item in ax.get_xticklabels()]
-labels[0] = 'Giscard'
-labels[1] = 'Mitterand'
-labels[2] = 'Chirac'
-labels[3] = 'Sarkozy'
-labels[4] = 'Hollande'
-labels[5] = 'Macron'
+
+for i in range(0, nbSpeaker):
+	labels[i]=Result[i*3]
+
 # add another label if you add a president
 plt.boxplot(RatioList)
 ax.set_xticklabels(labels)
