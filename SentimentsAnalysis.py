@@ -133,41 +133,30 @@ for i in range(sizeOfFiles-1, -1, -1): # browse all the array from end to beginn
 	
 # we fill up the informations for all the presidents
 iFiles = 0
-nbSpeaker = 0
 
-nameOfSpeaker = "NotDefined" # This can't be a speaker's name. 
-nameOfSpeakers = []
-listOfSpeaker = [[]]
-
-# how many different speakers in the Files list ?
-while (iFiles<sizeOfFiles):
-	if nameOfSpeaker!=speeches[iFiles].name:
-		nameOfSpeaker=speeches[iFiles].name
-		nameOfSpeakers.append(nameOfSpeaker)
-		nbSpeaker+=1
-	iFiles+=1
-
-# do the separation
-# faire une fonction ? retourner une liste de structure ?
-iFiles = 0
+# do the grouping
 Result = []
-
-for i in range(0, nbSpeaker):
-	ratio = []
-	year = []
-	while (iFiles<sizeOfFiles and speeches[iFiles].name==nameOfSpeakers[i]):
-		ratio.append(speeches[iFiles].ratio)
-		year.append(speeches[iFiles].year)
-		iFiles+=1
-	Result.append(nameOfSpeakers[i]) # the name is the first param
-	Result.append(ratio) # then, there are the ratio
-	Result.append(year) # then, the years
+nameOfSpeaker = "" # at the beginning, the speaker is not defined 
+ratio = []
+year = []
+while (iFiles<sizeOfFiles):
+	if nameOfSpeaker!=speeches[iFiles].name: # if the speaker changes
+		if (len(nameOfSpeaker)>0): # if the speaker is defined (that doesn't happen when nameOfSpeaker = "")
+			Result.append([nameOfSpeaker, ratio, year]); # we add its name, its ratio list and year list 
+		nameOfSpeaker=speeches[iFiles].name # we change the name of the actual speaker
+		ratio = [] # we reinitialize the ratio list
+		year = [] # same for the year
+	ratio.append(speeches[iFiles].ratio) # if the speaker is still the same, we add the ratio to its ratio list
+	year.append(speeches[iFiles].year) # same for the year
+	iFiles+=1
+Result.append([nameOfSpeaker, ratio, year]); # we add the last speaker's parameters to the List
 
 # we create a list with all the ratios
 Ratio = []
-for i in range(1, len(Result), 3):
-	for j in range(0, len(Result[i])):
-		Ratio.append(Result[i][j])
+for i in range(0, len(Result)):
+	for j in range(0, len(Result[i][1])):
+		Ratio.append(Result[i][1][j])
+	
 
 # we calculate the moving average and also two limits (inf and sup)
 movingAverage = []
@@ -181,7 +170,6 @@ for i in range(2, len(Ratio)):
 # we create a list with the same size than the moving average
 yearsMovingAv = [speeches[i].year for i in range(2,sizeOfFiles)]	
 
-
 # first figure : 
 plt.figure(1)
 plt.plot(yearsMovingAv, movingAverage, 'b', label='Moving Average')
@@ -189,27 +177,28 @@ plt.plot(yearsMovingAv, movingAverageInf, 'b--')
 plt.plot(yearsMovingAv, movingAverageSup, 'b--')
 color = ['magenta', 'black', 'yellow', 'blue', 'orange', 'green', 'red', 'purple', 'brown', 'pink', 'gray', 'olive', 'cyan']
 iColor = 0
-for i in range(0, nbSpeaker*3, 3): # for each speakers, there are 3 parameters (name, ratio and year) => i in range(0, 3*nbSpeaker)
+
+
+for i in range(0, len(Result)):
 	if (iColor>=len(color)):
 		iColor=0
-	plt.scatter(Result[i+2],Result[i+1], c = color[iColor], label=Result[i]) 
+	plt.scatter(Result[i][2],Result[i][1], c = color[iColor], label=Result[i][0]) 
 	iColor+=1
 
 plt.legend()
 plt.title('Positiveness ratio in speeches depending on the year')
 plt.show()
 
-
 # second figure :
 RatioList = [] 
-for i in range(0, nbSpeaker*3, 3):
-	RatioList.append(Result[i+1])
+for i in range(0, len(Result)):
+	RatioList.append(Result[i][1])
 fig, ax = plt.subplots()
 fig.canvas.draw()
 labels = [item.get_text() for item in ax.get_xticklabels()]
 
-for i in range(0, nbSpeaker):
-	labels[i]=Result[i*3]
+for i in range(0, len(Result)):
+	labels[i]=Result[i][0]
 
 plt.boxplot(RatioList)
 ax.set_xticklabels(labels)
