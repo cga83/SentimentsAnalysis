@@ -211,7 +211,6 @@ labels = [item.get_text() for item in ax.get_xticklabels()]
 for i in range(0, nbSpeaker):
 	labels[i]=Result[i*3]
 
-# add another label if you add a president
 plt.boxplot(RatioList)
 ax.set_xticklabels(labels)
 plt.title('Positiveness ratio in speeches')
